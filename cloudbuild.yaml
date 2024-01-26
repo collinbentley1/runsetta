@@ -27,3 +27,5 @@
     - '.'
   images:
   - 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA'
+  options:
+  - logging: CLOUD_LOGGING_ONLY
