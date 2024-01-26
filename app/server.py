@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Response
 from fastapi.responses import RedirectResponse, FileResponse
 from langserve import add_routes
+from pydantic import BaseModel  # Import BaseModel from pydantic
 from coach_bennett import chain as coach_bennett_chain
 from openai import OpenAI
 from pathlib import Path
