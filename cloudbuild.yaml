@@ -23,8 +23,6 @@
     - '--set-env-vars'
     - 'LANGCHAIN_TRACING_V2=true,LANGCHAIN_ENDPOINT=https://api.smith.langchain.com'
     - '--allow-unauthenticated'
-    - '--source'
-    - '.'
   images:
   - 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA'
   options:
