@@ -13,8 +13,12 @@ client = OpenAI()
 async def redirect_root_to_docs():
     return RedirectResponse("/docs")
 
+class AudioRequest(BaseModel):
+    input_text: str
+
 @app.post("/audio")
-async def text_to_speech(input_text: str):
+async def text_to_speech(audio_request: AudioRequest):
+    input_text = audio_request.input_text
     try:
         response = client.audio.speech.create(
             model="tts-1-hd",
