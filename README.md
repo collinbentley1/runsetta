@@ -91,3 +91,4 @@ echo -n "my super secret data" | gcloud secrets create my-secret \
 ```shell
 gcloud run deploy hypercoach-gai --source . --port 8080 --allow-unauthenticated --region us-east4 --set-secrets OPENAI_API_KEY=HC_OPENAI_API_KEY:1,LANGCHAIN_PROJECT=HC_LANGCHAIN_PROJECT:1,LANGCHAIN_API_KEY=LANGCHAIN_API_KEY:1 --set-env-vars LANGCHAIN_TRACING_V2=true,LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
 ```
+
