@@ -1,0 +1,29 @@
+  steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA', '.']
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA']
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+    - 'run'
+    - 'deploy'
+    - 'hypercoach-gai'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA'
+    - '--region'
+    - 'us-east4'
+    - '--port'
+    - '8080'
+    - '--set-secrets'
+    - 'OPENAI_API_KEY=HC_OPENAI_API_KEY:1,LANGCHAIN_PROJECT=HC_LANGCHAIN_PROJECT:1,LANGCHAIN_API_KEY=LANGCHAIN_API_KEY:1'
+    - '--set-env-vars'
+    - 'LANGCHAIN_TRACING_V2=true,LANGCHAIN_ENDPOINT=https://api.smith.langchain.com'
+    - '--allow-unauthenticated'
+    - '--source'
+    - '.'
+  images:
+  - 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA'
