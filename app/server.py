@@ -12,7 +12,7 @@ async def redirect_root_to_docs():
     return RedirectResponse("/docs")
 
 
-# Edit this to add the chain you want to add
+# Langchain template routes
 add_routes(app, coach_bennett_chain, path="/coach-bennett")
 
 if __name__ == "__main__":
