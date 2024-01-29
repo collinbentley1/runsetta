@@ -74,13 +74,6 @@ struct SummaryView: View {
                 Text("No workout data available")
             }
         }
-        .task {
-            do {
-                try await OpenAIService.shared.makeAPICall(message: "I'm making progress but my arm is sore.")
-            } catch {
-                print(error.localizedDescription)
-            }
-        }
     }
 
     private func formatTimeInterval(_ timeInterval: TimeInterval) -> String {
