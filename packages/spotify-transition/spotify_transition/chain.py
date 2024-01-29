@@ -5,12 +5,12 @@ _prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "Provide a 10-20 second motivational message to a runner inspired by the energy, themes, and lyrics of the song. The message should incorporate the song's vibe and spirit without directly quoting the title or too many of the lyrics. Emphasize how the song's essence can drive and energize during the run.",
+            "Write a straightforward, one-liner motivational message to a runner inspired by the themes and lyrics of the song that's about to play next.",
         ),
         ("human", "{text}"),
     ]
 )
-_model = ChatOpenAI()
+_model = ChatOpenAI(temperature=0.8)
 
 # if you update this, you MUST also update ../pyproject.toml
 # with the new `tool.langserve.export_attr`
