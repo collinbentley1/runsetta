@@ -9,6 +9,7 @@ import shutil
 import requests
 import os
 from dotenv import load_dotenv
+from spotify_transition import chain as spotify_transition_chain
 
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
@@ -87,6 +88,7 @@ async def text_to_speech(audio_request: AudioRequest):
 
 # Langchain template routes
 add_routes(app, coach_bennett_chain, path="/coach-bennett")
+add_routes(app, spotify_transition_chain, path="/spotify-transition")
 
 if __name__ == "__main__":
     import uvicorn
