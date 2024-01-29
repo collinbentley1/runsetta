@@ -45,6 +45,13 @@
 		F054BB0F2B63A30900B2FAEB /* RequestModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB0D2B63A30900B2FAEB /* RequestModels.swift */; };
 		F054BB112B63A63800B2FAEB /* ResponseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB102B63A63800B2FAEB /* ResponseModels.swift */; };
 		F054BB122B63A63800B2FAEB /* ResponseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB102B63A63800B2FAEB /* ResponseModels.swift */; };
+		F054BB172B63B52700B2FAEB /* CoachAudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB162B63B52700B2FAEB /* CoachAudioView.swift */; };
+		F054BB1E2B656B6000B2FAEB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB1D2B656B6000B2FAEB /* AppDelegate.swift */; };
+		F054BB212B657E0F00B2FAEB /* SpotifyiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F054BB202B657E0F00B2FAEB /* SpotifyiOS.framework */; };
+		F054BB232B659A0700B2FAEB /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB222B659A0700B2FAEB /* Constants.swift */; };
+		F054BB252B659A8200B2FAEB /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB242B659A8200B2FAEB /* ViewController.swift */; };
+		F054BB272B659B0300B2FAEB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB262B659B0300B2FAEB /* SceneDelegate.swift */; };
+		F054BB292B659D5700B2FAEB /* ViewControllerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F054BB282B659D5700B2FAEB /* ViewControllerWrapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +115,15 @@
 		F054BB0A2B63961600B2FAEB /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
 		F054BB0D2B63A30900B2FAEB /* RequestModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestModels.swift; sourceTree = "<group>"; };
 		F054BB102B63A63800B2FAEB /* ResponseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseModels.swift; sourceTree = "<group>"; };
+		F054BB162B63B52700B2FAEB /* CoachAudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachAudioView.swift; sourceTree = "<group>"; };
+		F054BB1B2B65689A00B2FAEB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F054BB1C2B6569DB00B2FAEB /* MirroringWorkoutsSample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MirroringWorkoutsSample-Bridging-Header.h"; sourceTree = "<group>"; };
+		F054BB1D2B656B6000B2FAEB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F054BB202B657E0F00B2FAEB /* SpotifyiOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyiOS.framework; sourceTree = "<group>"; };
+		F054BB222B659A0700B2FAEB /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F054BB242B659A8200B2FAEB /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		F054BB262B659B0300B2FAEB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		F054BB282B659D5700B2FAEB /* ViewControllerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +131,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F054BB212B657E0F00B2FAEB /* SpotifyiOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +148,8 @@
 		40C2ED9D29EFAA98005E7EFB = {
 			isa = PBXGroup;
 			children = (
+				F054BB1C2B6569DB00B2FAEB /* MirroringWorkoutsSample-Bridging-Header.h */,
+				F054BB202B657E0F00B2FAEB /* SpotifyiOS.framework */,
 				EC1B792D6AFFAA6B647F564D /* README.md */,
 				40C2EDCD29EFAD78005E7EFB /* Shared */,
 				40C2EDA829EFAA98005E7EFB /* MirroringWorkoutsSample */,
@@ -153,6 +172,7 @@
 		40C2EDA829EFAA98005E7EFB /* MirroringWorkoutsSample */ = {
 			isa = PBXGroup;
 			children = (
+				F054BB1B2B65689A00B2FAEB /* Info.plist */,
 				40351F9429FAF6720073D06A /* MirroringWorkoutsSample.entitlements */,
 				40C2EDA929EFAA98005E7EFB /* MirroringWorkoutsSampleApp.swift */,
 				40351F9029F8E5A20073D06A /* StartView.swift */,
@@ -160,8 +180,14 @@
 				40351F9529FAF7E30073D06A /* WorkoutListView.swift */,
 				402FB4EA29FE2B9400ABE600 /* ChartView.swift */,
 				402FB4EC29FE361100ABE600 /* SummaryView.swift */,
+				F054BB162B63B52700B2FAEB /* CoachAudioView.swift */,
 				40C2EDAD29EFAA9A005E7EFB /* Assets.xcassets */,
 				40C2EDAF29EFAA9A005E7EFB /* Preview Content */,
+				F054BB1D2B656B6000B2FAEB /* AppDelegate.swift */,
+				F054BB222B659A0700B2FAEB /* Constants.swift */,
+				F054BB242B659A8200B2FAEB /* ViewController.swift */,
+				F054BB262B659B0300B2FAEB /* SceneDelegate.swift */,
+				F054BB282B659D5700B2FAEB /* ViewControllerWrapper.swift */,
 			);
 			path = MirroringWorkoutsSample;
 			sourceTree = "<group>";
@@ -241,6 +267,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 40C2EDCA29EFAA9A005E7EFB /* Build configuration list for PBXNativeTarget "MirroringWorkoutsSample" */;
 			buildPhases = (
+				F054BB1F2B6577B500B2FAEB /* ShellScript */,
 				40C2EDA229EFAA98005E7EFB /* Sources */,
 				40C2EDA329EFAA98005E7EFB /* Frameworks */,
 				40C2EDA429EFAA98005E7EFB /* Resources */,
@@ -332,22 +359,49 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		F054BB1F2B6577B500B2FAEB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${PLATFORM_NAME}\" == \"iphonesimulator\" ]; then\n    echo \"Removing Spotify framework for simulator build\"\n    rm -rf \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/SpotifyiOS.framework\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		40C2EDA229EFAA98005E7EFB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				47BB330D2A03090300883F18 /* ElapsedTimeView.swift in Sources */,
+				F054BB232B659A0700B2FAEB /* Constants.swift in Sources */,
 				40C2EDAC29EFAA98005E7EFB /* MirroringWorkoutView.swift in Sources */,
 				F054BB112B63A63800B2FAEB /* ResponseModels.swift in Sources */,
 				40351F9629FAF7E30073D06A /* WorkoutListView.swift in Sources */,
 				402FB4F329FEE00400ABE600 /* HKWorkout+Statistics.swift in Sources */,
 				F054BB0E2B63A30900B2FAEB /* RequestModels.swift in Sources */,
 				402FB4F029FEDD4700ABE600 /* MetricsTimelineSchedule.swift in Sources */,
+				F054BB272B659B0300B2FAEB /* SceneDelegate.swift in Sources */,
 				40A8DB5E29F5956D00D00421 /* WorkoutManager.swift in Sources */,
+				F054BB292B659D5700B2FAEB /* ViewControllerWrapper.swift in Sources */,
 				40A8DB6329F5A62300D00421 /* WorkoutManager+iOS.swift in Sources */,
+				F054BB252B659A8200B2FAEB /* ViewController.swift in Sources */,
 				F054BB0B2B63961600B2FAEB /* OpenAIService.swift in Sources */,
+				F054BB172B63B52700B2FAEB /* CoachAudioView.swift in Sources */,
 				402FB4EB29FE2B9400ABE600 /* ChartView.swift in Sources */,
+				F054BB1E2B656B6000B2FAEB /* AppDelegate.swift in Sources */,
 				40351F9129F8E5A20073D06A /* StartView.swift in Sources */,
 				40CA44902A0E1FBF0047F807 /* Logger.swift in Sources */,
 				40C2EDAA29EFAA98005E7EFB /* MirroringWorkoutsSampleApp.swift in Sources */,
@@ -521,21 +575,24 @@
 				DEVELOPMENT_ASSET_PATHS = "\"MirroringWorkoutsSample Watch App/Preview Content\"";
 				DEVELOPMENT_TEAM = MB2GC9XZRL;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MirroringWorkoutsSample-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = MirroringWorkoutsSample;
+				INFOPLIST_KEY_CFBundleDisplayName = HyperCoach;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Your workout related data will be used to display your saved workouts in MyWorkouts.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workouts tracked by MyWorkouts on Apple Watch will be saved to HealthKit.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKApplication = YES;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.example.apple-samplecode.MirroringWorkoutsSampleMB2GC9XZRL";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.hypercoach.ios;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.MirroringWorkoutsSample${SAMPLE_CODE_DISAMBIGUATOR}.watchkitapp";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=watchos*]" = "com.example.apple-samplecode.MirroringWorkoutsSampleMB2GC9XZRL";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hypercoach.ios.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
@@ -561,21 +618,24 @@
 				DEVELOPMENT_ASSET_PATHS = "\"MirroringWorkoutsSample Watch App/Preview Content\"";
 				DEVELOPMENT_TEAM = MB2GC9XZRL;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MirroringWorkoutsSample-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = MirroringWorkoutsSample;
+				INFOPLIST_KEY_CFBundleDisplayName = HyperCoach;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Your workout related data will be used to display your saved workouts in MyWorkouts.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workouts tracked by MyWorkouts on Apple Watch will be saved to HealthKit.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKApplication = YES;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.example.apple-samplecode.MirroringWorkoutsSampleMB2GC9XZRL";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.hypercoach.ios;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.MirroringWorkoutsSample${SAMPLE_CODE_DISAMBIGUATOR}.watchkitapp";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=watchos*]" = "com.example.apple-samplecode.MirroringWorkoutsSampleMB2GC9XZRL";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hypercoach.ios.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
@@ -602,7 +662,12 @@
 				DEVELOPMENT_ASSET_PATHS = "\"MirroringWorkoutsSample/Preview Content\"";
 				DEVELOPMENT_TEAM = MB2GC9XZRL;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MirroringWorkoutsSample/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MirroringWorkoutsSample;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Your workout related data will be used to display your saved workouts in MyWorkouts.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workouts tracked by MyWorkouts on Apple Watch will be saved to HealthKit.";
@@ -617,14 +682,23 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.MirroringWorkoutsSample${SAMPLE_CODE_DISAMBIGUATOR}";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-v",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hypercoach.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "MirroringWorkoutsSample-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -641,7 +715,12 @@
 				DEVELOPMENT_ASSET_PATHS = "\"MirroringWorkoutsSample/Preview Content\"";
 				DEVELOPMENT_TEAM = MB2GC9XZRL;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MirroringWorkoutsSample/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MirroringWorkoutsSample;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Your workout related data will be used to display your saved workouts in MyWorkouts.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Workouts tracked by MyWorkouts on Apple Watch will be saved to HealthKit.";
@@ -656,14 +735,23 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.MirroringWorkoutsSample${SAMPLE_CODE_DISAMBIGUATOR}";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-v",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hypercoach.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "MirroringWorkoutsSample-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

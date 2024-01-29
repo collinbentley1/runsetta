@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct MirroringWorkoutsSampleApp: App {
+    #if !targetEnvironment(simulator)
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #endif
     private let workoutManager = WorkoutManager.shared
 
     var body: some Scene {
