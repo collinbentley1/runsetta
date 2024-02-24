@@ -14,6 +14,8 @@
     - 'hypercoach-gai'
     - '--image'
     - 'gcr.io/$PROJECT_ID/hypercoach-gai:$COMMIT_SHA'
+    - '--min-instances'
+    - '1'
     - '--region'
     - 'us-east4'
     - '--port'
