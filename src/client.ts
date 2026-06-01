@@ -6,7 +6,7 @@ async function refreshHealth(): Promise<void> {
   }
 
   try {
-    const response = await fetch("/healthz");
+    const response = await fetch("/api/health");
     const health = (await response.json()) as { ok: boolean; openaiConfigured: boolean; spotifyConfigured: boolean };
 
     healthEl.textContent = [

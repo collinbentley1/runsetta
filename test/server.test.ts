@@ -12,7 +12,7 @@ const root = join(import.meta.dir, "..");
 
 describe("Runsetta API", () => {
   test("reports health without secrets", async () => {
-    const response = await handleRequest(new Request("https://runsetta.test/healthz"));
+    const response = await handleRequest(new Request("https://runsetta.test/api/health"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
