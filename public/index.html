@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Runsetta</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <script type="module" src="/assets/client.js"></script>
+  </head>
+  <body>
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <p class="eyebrow">Runsetta API</p>
+        <h1 id="title">Workout coaching, generated cleanly.</h1>
+        <p class="lede">
+          Native Swift clients talk to this Bun service for coaching prompts, track transitions, speech, and Spotify token exchange.
+        </p>
+        <p class="status" data-health>Checking API health...</p>
+      </section>
+
+      <section class="endpoints" aria-label="API endpoints">
+        <article>
+          <h2>Coach</h2>
+          <code>POST /api/coach</code>
+        </article>
+        <article>
+          <h2>Transition</h2>
+          <code>POST /api/spotify-transition</code>
+        </article>
+        <article>
+          <h2>Speech</h2>
+          <code>POST /api/audio</code>
+        </article>
+        <article>
+          <h2>Spotify</h2>
+          <code>POST /api/spotify/token</code>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

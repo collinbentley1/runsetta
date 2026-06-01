@@ -1,0 +1,33 @@
+name: Apple
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  swift-package:
+    name: Swift package check
+    runs-on: macos-26
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Show toolchain
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          swift --version
+
+      - name: Check RunsettaCore
+        run: |
+          set -euo pipefail
+          swift build --package-path apple
+          swift run --package-path apple RunsettaCoreCheck
