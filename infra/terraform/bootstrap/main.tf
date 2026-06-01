@@ -194,10 +194,12 @@ resource "google_project_iam_member" "terraform_project_roles" {
 
 resource "google_project_iam_member" "deploy_project_roles" {
   for_each = {
-    prod_browser      = { role = "roles/browser", email = google_service_account.prod_deploy.email }
-    prod_run_admin    = { role = "roles/run.admin", email = google_service_account.prod_deploy.email }
-    preview_browser   = { role = "roles/browser", email = google_service_account.preview_deploy.email }
-    preview_run_admin = { role = "roles/run.admin", email = google_service_account.preview_deploy.email }
+    prod_browser          = { role = "roles/browser", email = google_service_account.prod_deploy.email }
+    prod_run_admin        = { role = "roles/run.admin", email = google_service_account.prod_deploy.email }
+    prod_secret_viewer    = { role = "roles/secretmanager.viewer", email = google_service_account.prod_deploy.email }
+    preview_browser       = { role = "roles/browser", email = google_service_account.preview_deploy.email }
+    preview_run_admin     = { role = "roles/run.admin", email = google_service_account.preview_deploy.email }
+    preview_secret_viewer = { role = "roles/secretmanager.viewer", email = google_service_account.preview_deploy.email }
   }
 
   project = var.project_id
