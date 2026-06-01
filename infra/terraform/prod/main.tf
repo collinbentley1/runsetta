@@ -1,0 +1,158 @@
+locals {
+  labels = {
+    app        = "runsetta"
+    managed-by = "terraform"
+  }
+
+  runtime_secrets = toset([
+    "openai-api-key",
+    "spotify-client-id",
+    "spotify-client-secret",
+    "spotify-redirect-uri",
+  ])
+}
+
+resource "google_artifact_registry_repository" "site" {
+  #checkov:skip=CKV_GCP_84:Google-managed encryption is sufficient for public API container images.
+  project       = var.project_id
+  location      = var.region
+  repository_id = var.artifact_registry_repository_id
+  description   = "Container images for the Runsetta API."
+  format        = "DOCKER"
+
+  docker_config {
+    immutable_tags = true
+  }
+
+  cleanup_policy_dry_run = false
+
+  cleanup_policies {
+    id     = "delete-pr-images-after-30-days"
+    action = "DELETE"
+
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["pr-"]
+      older_than   = "2592000s"
+    }
+  }
+
+  cleanup_policies {
+    id     = "keep-recent-images"
+    action = "KEEP"
+
+    most_recent_versions {
+      keep_count = 30
+    }
+  }
+
+  labels = local.labels
+}
+
+resource "google_artifact_registry_repository_iam_member" "prod_deploy_writer" {
+  project    = var.project_id
+  location   = google_artifact_registry_repository.site.location
+  repository = google_artifact_registry_repository.site.repository_id
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${var.prod_deploy_service_account_email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "preview_deploy_writer" {
+  project    = var.project_id
+  location   = google_artifact_registry_repository.site.location
+  repository = google_artifact_registry_repository.site.repository_id
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${var.preview_deploy_service_account_email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "runtime_reader" {
+  project    = var.project_id
+  location   = google_artifact_registry_repository.site.location
+  repository = google_artifact_registry_repository.site.repository_id
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:${var.runtime_service_account_email}"
+}
+
+resource "google_secret_manager_secret" "runtime" {
+  #checkov:skip=CKV_GCP_82:Secret rotation is manual until the API contract and domain are finalized.
+  for_each = local.runtime_secrets
+
+  project   = var.project_id
+  secret_id = each.value
+
+  replication {
+    auto {}
+  }
+
+  labels = local.labels
+}
+
+resource "google_secret_manager_secret_iam_member" "runtime_accessor" {
+  for_each = google_secret_manager_secret.runtime
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.runtime_service_account_email}"
+}
+
+resource "google_cloud_run_v2_service" "site" {
+  project              = var.project_id
+  name                 = var.service_name
+  location             = var.region
+  client               = "terraform"
+  deletion_protection  = true
+  ingress              = "INGRESS_TRAFFIC_ALL"
+  invoker_iam_disabled = true
+  labels               = local.labels
+
+  template {
+    service_account                  = var.runtime_service_account_email
+    timeout                          = "300s"
+    max_instance_request_concurrency = 80
+
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 10
+    }
+
+    containers {
+      name  = "site"
+      image = var.bootstrap_image
+
+      ports {
+        name           = "http1"
+        container_port = 8080
+      }
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+
+        cpu_idle          = true
+        startup_cpu_boost = true
+      }
+    }
+  }
+
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
+  }
+
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers[0].image,
+    ]
+  }
+
+  depends_on = [
+    google_artifact_registry_repository.site,
+    google_artifact_registry_repository_iam_member.runtime_reader,
+    google_secret_manager_secret_iam_member.runtime_accessor,
+  ]
+}

@@ -1,0 +1,14 @@
+.git
+.github
+.terraform
+infra
+outputs
+work
+node_modules
+coverage
+dist
+**/.build
+**/.swiftpm
+gha-creds-*.json
+.env
+.env.*
