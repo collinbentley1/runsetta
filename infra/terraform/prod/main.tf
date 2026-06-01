@@ -4,6 +4,11 @@ locals {
     managed-by = "terraform"
   }
 
+  custom_domains = toset([
+    "runsetta.com",
+    "www.runsetta.com",
+  ])
+
   runtime_secrets = toset([
     "openai-api-key",
     "spotify-client-id",
@@ -155,4 +160,31 @@ resource "google_cloud_run_v2_service" "site" {
     google_artifact_registry_repository_iam_member.runtime_reader,
     google_secret_manager_secret_iam_member.runtime_accessor,
   ]
+}
+
+resource "google_cloud_run_domain_mapping" "site" {
+  for_each = local.custom_domains
+
+  provider = google.no_attribution
+  project  = var.project_id
+  location = var.region
+  name     = each.value
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.site.name
+  }
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [
+      metadata[0].annotations,
+      metadata[0].labels,
+      spec[0].certificate_mode,
+      spec[0].force_override,
+    ]
+  }
 }

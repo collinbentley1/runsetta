@@ -13,6 +13,16 @@ output "cloud_run_service_uri" {
   value       = google_cloud_run_v2_service.site.uri
 }
 
+output "cloud_run_domain_mappings" {
+  description = "Production Cloud Run custom domain mappings and DNS records."
+  value = {
+    for domain, mapping in google_cloud_run_domain_mapping.site : domain => {
+      conditions       = try(mapping.status[0].conditions, [])
+      resource_records = try(mapping.status[0].resource_records, [])
+    }
+  }
+}
+
 output "runtime_secret_names" {
   description = "Secret Manager secret names expected by Cloud Run deploy workflows."
   value       = sort([for secret in google_secret_manager_secret.runtime : secret.secret_id])
