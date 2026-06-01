@@ -1,0 +1,9 @@
+{
+  "name": "runsetta",
+  "projectId": "runsetta",
+  "region": "us-east4",
+  "serviceName": "runsetta",
+  "artifactRegistryRepository": "api",
+  "platformVersion": "v0.1.2",
+  "runtimeConfigScript": ".github/platform/runtime-config.sh"
+}
