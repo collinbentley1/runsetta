@@ -10,34 +10,65 @@
     <script type="module" src="/assets/client.js"></script>
   </head>
   <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Runsetta home">
+        <img src="/favicon.svg" alt="" width="28" height="28" />
+        <span>Runsetta</span>
+      </a>
+      <span class="availability" data-health>Live demo</span>
+    </header>
+
     <main>
-      <section class="hero" aria-labelledby="title">
-        <p class="eyebrow">Runsetta API</p>
-        <h1 id="title">Workout coaching, generated cleanly.</h1>
-        <p class="lede">
-          Native Swift clients talk to this Bun service for coaching prompts, track transitions, speech, and Spotify token exchange.
-        </p>
-        <p class="status" data-health>Checking API health...</p>
+      <section class="intro" aria-labelledby="title">
+        <div class="copy">
+          <p class="eyebrow">For the middle miles</p>
+          <h1 id="title">One useful cue when the run gets loud.</h1>
+          <p class="lede">
+            Runsetta turns effort, pace, heart rate, and the next song into a short line you can hear on your phone or watch.
+          </p>
+        </div>
+
+        <section class="cue-tool" aria-labelledby="cue-title">
+          <div class="runline" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <p class="tool-label" id="cue-title">Try a cue</p>
+          <blockquote data-cue>Stay smooth under pressure, relax your shoulders, and make the next step simple.</blockquote>
+
+          <form data-cue-form>
+            <label>
+              Name
+              <input autocomplete="given-name" name="runnerName" placeholder="Collin" />
+            </label>
+            <label>
+              Effort
+              <select name="effort">
+                <option value="easy">Easy</option>
+                <option value="steady">Steady</option>
+                <option selected value="hard">Hard</option>
+                <option value="race">Race</option>
+              </select>
+            </label>
+            <label class="wide">
+              Focus
+              <input name="cue" placeholder="settle breathing" />
+            </label>
+            <button type="submit">Get cue</button>
+          </form>
+          <p class="form-note" data-note>Made for one sentence at a time.</p>
+        </section>
       </section>
 
-      <section class="endpoints" aria-label="API endpoints">
-        <article>
-          <h2>Coach</h2>
-          <code>POST /api/coach</code>
-        </article>
-        <article>
-          <h2>Transition</h2>
-          <code>POST /api/spotify-transition</code>
-        </article>
-        <article>
-          <h2>Speech</h2>
-          <code>POST /api/audio</code>
-        </article>
-        <article>
-          <h2>Spotify</h2>
-          <code>POST /api/spotify/token</code>
-        </article>
+      <section class="principles" aria-label="Runsetta principles">
+        <p>No feed.</p>
+        <p>No streak theater.</p>
+        <p>Just the next useful line.</p>
       </section>
     </main>
+
+    <footer>Open-source workout companion for iPhone and Apple Watch.</footer>
   </body>
 </html>
