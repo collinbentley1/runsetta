@@ -20,7 +20,7 @@ type Handler = (request: Request) => Promise<Response> | Response;
 
 const routes: Record<string, Handler> = {
   "GET /api/health": handleHealth,
-  "GET /healthz": handleHealth,
+  "GET /livez": handleHealth,
   "POST /api/coach": async (request) => jsonResponse(await generateCoachMessage(await parseJson(request, CoachMessageRequestSchema))),
   "POST /api/spotify-transition": async (request) =>
     jsonResponse(await generateSpotifyTransition(await parseJson(request, SpotifyTransitionRequestSchema))),

@@ -19,7 +19,7 @@ public struct RunsettaAPIClient: Sendable {
     }
 
     public func health() async throws -> HealthStatus {
-        try await get("/healthz")
+        try await get("/livez")
     }
 
     public func coachMessage(_ request: CoachMessageRequest) async throws -> GeneratedMessage {
