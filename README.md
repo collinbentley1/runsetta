@@ -15,6 +15,8 @@ bun run verify
 bun run dev
 ```
 
+The API targets stable Bun 1.4. Use `bun upgrade --stable` for local development; the Docker image pins `bun-v1.4.0` exactly.
+
 Endpoints:
 
 - `GET /healthz`
