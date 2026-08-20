@@ -19,7 +19,7 @@ The API targets stable Bun 1.4. Use `bun upgrade --stable` for local development
 
 Endpoints:
 
-- `GET /healthz`
+- `GET /livez`
 - `POST /api/coach`
 - `POST /api/spotify-transition`
 - `POST /api/audio`
