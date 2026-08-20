@@ -23,6 +23,17 @@ describe("Runsetta API", () => {
     });
   });
 
+  test("answers the platform-standard /livez path with health JSON", async () => {
+    const response = await handleRequest(new Request("https://runsetta.test/livez"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      service: "runsetta",
+    });
+  });
+
   test("returns a local fallback coach cue in offline mode", async () => {
     const response = await handleRequest(
       jsonRequest("/api/coach", {
