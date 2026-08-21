@@ -1,13 +1,17 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { foldHexStringLiterals } from "./secret-policy";
+import { findCredentialShapedHexLiterals } from "./secret-policy";
 
 const root = join(import.meta.dir, "..");
 const failures: string[] = [];
 const forbiddenNeedles = ["lang" + "chain", "lang" + "serve"];
 
 await requireContains("Dockerfile", "dhi.io/bun", "Dockerfile must use Docker Hardened Bun images.");
-await requireContains("Dockerfile", "bun-v1.4.0", "Dockerfile must pin Bun 1.4.0.");
+await requireContains(
+  "Dockerfile",
+  "FROM oven/bun:1.4.0@sha256:",
+  "Dockerfile must pin Bun 1.4.0 by digest.",
+);
 await requireContains("public/index.html", 'rel="icon"', "The document must link a favicon.");
 await rejectContains("public/index.html", "https://", "The frontend should not load third-party assets.");
 await rejectContains(
@@ -50,10 +54,8 @@ async function rejectForbiddenSourceText(): Promise<void> {
       }
     }
 
-    for (const candidate of foldHexStringLiterals(text)) {
-      if (candidate.length >= 32 && candidate.length < 64) {
-        failures.push(`${relativePath}: credential-shaped hexadecimal string literal found.`);
-      }
+    for (const _candidate of findCredentialShapedHexLiterals(relativePath, text)) {
+      failures.push(`${relativePath}: credential-shaped hexadecimal string literal found.`);
     }
   }
 }
