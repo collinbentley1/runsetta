@@ -12,18 +12,3 @@ output "cloud_run_service_uri" {
   description = "Production Cloud Run service URL."
   value       = module.site.cloud_run_service_uri
 }
-
-output "cloud_run_domain_mappings" {
-  description = "Production Cloud Run custom domain DNS records."
-  value       = module.site.cloud_run_domain_mappings
-}
-
-output "runtime_secret_names" {
-  description = "Secret Manager secret names expected by Cloud Run deploy workflows."
-  value = sort([
-    "openai-api-key",
-    "spotify-client-id",
-    "spotify-client-secret",
-    "spotify-redirect-uri",
-  ])
-}

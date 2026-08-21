@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { foldHexStringLiterals } from "../tools/secret-policy";
+import {
+  findCredentialShapedHexLiterals,
+  foldHexStringLiterals,
+} from "../tools/secret-policy";
 
 delete Bun.env.OPENAI_API_KEY;
 delete Bun.env.SPOTIFY_CLIENT_ID;
@@ -170,16 +173,13 @@ describe("Runsetta API", () => {
     expect(response.headers.get("X-Frame-Options")).toBe("DENY");
   });
 
-  test("current source tree contains no embedded 32-character hexadecimal credential", async () => {
+  test("current source tree contains no embedded credential-shaped hexadecimal literal", async () => {
     const files = await walk(root);
 
     for (const file of files) {
+      const relativePath = file.slice(root.length + 1);
       const text = await readFile(file, "utf8").catch(() => "");
-      expect(text.match(/["'][0-9a-f]{32}["']/i), file).toBeNull();
-
-      for (const match of text.matchAll(/["']([0-9a-f]{8,})["']\s*\+\s*["']([0-9a-f]{8,})["']/gi)) {
-        expect(`${match[1]}${match[2]}`.length, file).toBeLessThan(32);
-      }
+      expect(findCredentialShapedHexLiterals(relativePath, text), file).toEqual([]);
     }
   });
 
@@ -188,6 +188,31 @@ describe("Runsetta API", () => {
     const fixture = `${quote}${"a".repeat(16)}${quote} + ${quote}${"b".repeat(16)}${quote}`;
 
     expect(foldHexStringLiterals(fixture)).toEqual([`${"a".repeat(16)}${"b".repeat(16)}`]);
+  });
+
+  test("secret policy scans extensionless and Terraform content but permits reviewed SHA pins", () => {
+    const credential = "a".repeat(32);
+    const platformSha = "b".repeat(40);
+    expect(findCredentialShapedHexLiterals("src/credential-fixture", `token = "${credential}"`)).toEqual([
+      credential,
+    ]);
+    expect(
+      findCredentialShapedHexLiterals(
+        "infra/terraform/bootstrap/main.tf",
+        `api_token = "${credential}"`,
+      ),
+    ).toEqual([credential]);
+
+    const reviewedBootstrap = `module "bootstrap" {\n  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=${platformSha}"\n  trusted_platform_workflow_shas = [\n    "${platformSha}",\n  ]\n}\n`;
+    expect(
+      findCredentialShapedHexLiterals(
+        "infra/terraform/bootstrap/main.tf",
+        reviewedBootstrap,
+      ),
+    ).toEqual([]);
+    expect(findCredentialShapedHexLiterals("src/config.ts", `token = "${platformSha}"`)).toEqual([
+      platformSha,
+    ]);
   });
 });
 
@@ -204,7 +229,9 @@ async function walk(directory: string): Promise<string[]> {
   const files: string[] = [];
 
   for (const entry of entries) {
-    if ([".build", ".git", ".swiftpm", "dist", "node_modules"].includes(entry.name)) {
+    if (
+      [".build", ".git", ".swiftpm", ".terraform", "dist", "node_modules"].includes(entry.name)
+    ) {
       continue;
     }
 

@@ -15,7 +15,8 @@ bun run verify
 bun run dev
 ```
 
-The API targets stable Bun 1.4. Use `bun upgrade --stable` for local development; the Docker image pins `bun-v1.4.0` exactly.
+The API targets Bun 1.4. The package manager, release binary, and Docker Hardened
+Images are pinned by reviewed version and digest.
 
 Endpoints:
 
@@ -53,18 +54,35 @@ swift run RunsettaCoreCheck
 
 The checked Swift package contains the shared API contract and view model. `apple/Apps/iOS` and `apple/Apps/watchOS` contain the SwiftUI app entry points for Xcode.
 
-## Infrastructure
+## Infrastructure and delivery
 
-Terraform roots live under `infra/terraform`:
+The Terraform roots under `infra/terraform` are reviewed, validation-only
+mirrors of the platform modules. They are never deployment entrypoints. A
+protected GitHub pipeline selects Runsetta by immutable numeric repository ID
+and runs the exact roots under `collinbentley1/platform/terraform/deployments`.
+Do not run a consumer-root apply, use `-backend=false`, or add Secret Manager
+versions manually.
 
-- `bootstrap` enables required Google APIs, creates state storage, service accounts, and GitHub OIDC trust.
-- `prod` creates Artifact Registry, Secret Manager secret shells, and the production Cloud Run service.
+Preview revisions share one pre-created Cloud Run preview service. Each pull
+request receives a tagged, no-traffic revision; the platform's service-scoped
+operator reconciles and removes only the matching stale tag. Production and
+preview publishing, deployment, and preview operations use separate OIDC
+identities with resource-scoped roles.
 
-For a new project, run the first bootstrap apply with `-backend=false` so Terraform can create the state bucket before the GCS backend is used. After that, reinitialize normally and apply `prod`.
+Runsetta is deliberately offline in both preview and production. The reviewed
+runtime configuration sets `RUNSETTA_OFFLINE=1`, clears Cloud Run secret
+bindings, and grants the runtime service account access to zero secret payloads.
+The Terraform mirror may retain named secret containers as inert metadata, but
+`runtime_secret_accessor_ids` stays empty. Enabling OpenAI or Spotify requires a
+new platform review that pins exact numeric secret versions; it is not an
+operator-time configuration change.
 
-Secret values are intentionally not stored in GitHub. Add Secret Manager versions for:
+Before GitHub Actions are enabled, rotate delivery credentials into only their
+protected environments and remove the old repository-wide copies after the
+replacements are verified:
 
-- `openai-api-key`
-- `spotify-client-id`
-- `spotify-client-secret`
-- `spotify-redirect-uri`
+- `dependency-scan`: the least-scope Socket policy token.
+- `preview-build` and `production-build`: Docker Hardened Images credentials,
+  the Socket token, and the reviewed Grype database manifest.
+- publish, deploy, and preview-operation environments: approval/OIDC boundaries
+  only, with no reusable inherited secret bundle.
