@@ -7,6 +7,7 @@ import {
 } from "../tools/secret-policy";
 
 delete Bun.env.OPENAI_API_KEY;
+delete Bun.env.PLATFORM_DEPLOY_NONCE;
 delete Bun.env.SPOTIFY_CLIENT_ID;
 delete Bun.env.SPOTIFY_CLIENT_SECRET;
 Bun.env.RUNSETTA_OFFLINE = "1";
@@ -33,10 +34,37 @@ describe("Runsetta API", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toMatchObject({
+    expect(body).toEqual({
+      environment: appConfig.environment,
       ok: true,
+      openaiConfigured: false,
       service: "runsetta",
+      spotifyConfigured: false,
     });
+  });
+
+  test("echoes the deployment nonce only on /livez when configured", async () => {
+    Bun.env.PLATFORM_DEPLOY_NONCE = "test-deployment-nonce";
+
+    try {
+      const liveness = await handleRequest(new Request("https://runsetta.test/livez"));
+      const health = await handleRequest(new Request("https://runsetta.test/api/health"));
+
+      expect(liveness.status).toBe(200);
+      expect(await liveness.json()).toEqual({
+        deployment: "test-deployment-nonce",
+        ok: true,
+      });
+      expect(await health.json()).toEqual({
+        environment: appConfig.environment,
+        ok: true,
+        openaiConfigured: false,
+        service: "runsetta",
+        spotifyConfigured: false,
+      });
+    } finally {
+      delete Bun.env.PLATFORM_DEPLOY_NONCE;
+    }
   });
 
   test("returns a local fallback coach cue in offline mode", async () => {
