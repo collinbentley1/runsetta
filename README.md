@@ -29,6 +29,9 @@ Endpoints:
 Runtime environment:
 
 - `OPENAI_API_KEY`
+- `RUNSETTA_API_TOKEN` required before any configured OpenAI or Spotify
+  integration can be called; use at least 32 random characters and send it as
+  a bearer token only from trusted clients
 - `RUNSETTA_MESSAGE_MODEL` optional
 - `RUNSETTA_TTS_MODEL` optional, defaults to `gpt-4o-mini-tts`
 - `RUNSETTA_TTS_VOICE` optional, defaults to `marin`
@@ -36,7 +39,9 @@ Runtime environment:
 - `SPOTIFY_CLIENT_SECRET`
 - `SPOTIFY_REDIRECT_URI`
 
-The API never expects Spotify secrets in the Apple app. Token exchange happens server-side.
+The API never expects Spotify secrets in the Apple app. Token exchange happens
+server-side. The browser demo remains public only while local offline mode is
+active; enabling a paid integration without `RUNSETTA_API_TOKEN` fails closed.
 
 ## Apple
 
