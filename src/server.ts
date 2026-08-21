@@ -21,7 +21,7 @@ type Handler = (request: Request) => Promise<Response> | Response;
 
 const routes: Record<string, Handler> = {
   "GET /api/health": handleHealth,
-  "GET /livez": handleHealth,
+  "GET /livez": handleLiveness,
   "POST /api/coach": async (request) => jsonResponse(await generateCoachMessage(await parseJson(request, CoachMessageRequestSchema))),
   "POST /api/spotify-transition": async (request) =>
     jsonResponse(await generateSpotifyTransition(await parseJson(request, SpotifyTransitionRequestSchema))),
@@ -61,13 +61,22 @@ export async function handleRequest(request: Request): Promise<Response> {
 }
 
 function handleHealth(): Response {
-  return jsonResponse({
+  return jsonResponse(healthPayload());
+}
+
+function handleLiveness(): Response {
+  const deployment = Bun.env.PLATFORM_DEPLOY_NONCE;
+  return jsonResponse(deployment ? { ok: true, deployment } : healthPayload());
+}
+
+function healthPayload(): Record<string, boolean | string> {
+  return {
     ok: true,
     service: "runsetta",
     environment: appConfig.environment,
     openaiConfigured: Boolean(appConfig.openaiApiKey),
     spotifyConfigured: Boolean(appConfig.spotifyClientId && appConfig.spotifyClientSecret),
-  });
+  };
 }
 
 async function handleAudio(request: Request): Promise<Response> {
