@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { appConfig } from "./config";
+import { appConfig, type AppConfig } from "./config";
 import type { AudioRequest } from "./contracts";
 
 const contentTypes: Record<AudioRequest["format"], string> = {
@@ -14,18 +14,25 @@ export interface SpeechResult {
   contentType: string;
 }
 
-export async function createSpeech(input: AudioRequest): Promise<SpeechResult> {
-  if (!appConfig.openaiApiKey) {
+export async function createSpeech(
+  input: AudioRequest,
+  config: AppConfig = appConfig,
+): Promise<SpeechResult> {
+  if (config.offlineMode) {
+    throw new ServiceConfigurationError("Speech generation is disabled in offline mode.");
+  }
+
+  if (!config.openaiApiKey) {
     throw new ServiceConfigurationError("OPENAI_API_KEY is required for speech generation.");
   }
 
-  const client = new OpenAI({ apiKey: appConfig.openaiApiKey });
+  const client = new OpenAI({ apiKey: config.openaiApiKey });
   const response = await client.audio.speech.create({
     input: input.message,
     instructions: "Use clear synthetic coaching audio. Do not imitate a specific person.",
-    model: appConfig.ttsModel,
+    model: config.ttsModel,
     response_format: input.format,
-    voice: (input.voice ?? appConfig.ttsVoice) as string,
+    voice: (input.voice ?? config.ttsVoice) as string,
   });
 
   return {
