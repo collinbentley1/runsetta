@@ -52,7 +52,7 @@ function isReviewedBunRevision(
   }
 
   const exactSource =
-    "FROM oven/bun:1.4.0-alpine@sha256:07235578f79ef8c6f97d94aee7938e76f5cdba5f21ae5dbfdd3d3d38058437eb AS bun-release";
+    "FROM platform.invalid/bun-release AS bun-release";
   const exactDepsCheck =
     `RUN bun -e 'if (Bun.version !== "1.4.0" || Bun.revision !== "${candidate}") throw new Error("Bun image requires 1.4.0+34cbb9a40, got " + Bun.version + "+" + Bun.revision.slice(0, 9))'`;
   const exactRuntimeCheck =
