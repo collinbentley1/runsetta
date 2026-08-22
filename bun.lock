@@ -10,7 +10,6 @@
         "zod": "4.4.3",
       },
       "devDependencies": {
-        "@socketsecurity/bun-security-scanner": "1.1.2",
         "@types/bun": "1.4.0",
         "typescript": "7.0.2",
       },
@@ -28,8 +27,6 @@
     "@openai/agents-openai": ["@openai/agents-openai@0.17.0", "", { "dependencies": { "@openai/agents-core": "0.17.0", "debug": "^4.4.0", "openai": "^7.2.0" }, "peerDependencies": { "zod": "^4.0.0" } }, "sha512-pMqXK7YtNI3U9KLAZIt+WzB9AReOWt/kiY8nhc9eXWcIZIpkmrzFd6dQgBpGLKWPfvEfgRCDeIVfHpWoXr7hEg=="],
 
     "@openai/agents-realtime": ["@openai/agents-realtime@0.17.0", "", { "dependencies": { "@openai/agents-core": "0.17.0", "@types/ws": "^8.18.1", "debug": "^4.4.0", "ws": "^8.21.0" }, "peerDependencies": { "zod": "^4.0.0" } }, "sha512-spHgDIaWQIOJjwowjBTo0X9Jn3+CGX9fWgsyRUilsQ8SsnNrAre2km6sr8HwFnRiyQC0XpmTccieyfuXmzMfXg=="],
-
-    "@socketsecurity/bun-security-scanner": ["@socketsecurity/bun-security-scanner@1.1.2", "", {}, "sha512-TdsAg6SMolubyZ6HfIjLWlANfHvhV6i7pdWof4OQ33zPEwXJm2ilA755levHMR618MKq22+06Ag8efiVKowxqA=="],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 

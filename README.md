@@ -77,12 +77,11 @@ The Terraform mirror may retain named secret containers as inert metadata, but
 new platform review that pins exact numeric secret versions; it is not an
 operator-time configuration change.
 
-Before GitHub Actions are enabled, rotate delivery credentials into only their
-protected environments and remove the old repository-wide copies after the
-replacements are verified:
+Delivery credentials belong only in their protected environments; repository-wide
+copies are forbidden:
 
-- `dependency-scan`: the least-scope Socket policy token.
 - `preview-build` and `production-build`: Docker Hardened Images credentials,
   the Socket token, and the reviewed Grype database manifest.
+- the platform repository alone owns the trusted-main `dependency-scan` token.
 - publish, deploy, and preview-operation environments: approval/OIDC boundaries
   only, with no reusable inherited secret bundle.
