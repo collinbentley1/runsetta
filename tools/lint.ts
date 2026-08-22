@@ -1,6 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { findCredentialShapedHexLiterals } from "./secret-policy";
+import {
+  findCredentialShapedHexLiterals,
+  isSourceScanIgnoredDirectory,
+} from "./secret-policy";
 
 const root = join(import.meta.dir, "..");
 const failures: string[] = [];
@@ -61,14 +64,13 @@ async function rejectForbiddenSourceText(): Promise<void> {
 }
 
 async function* walk(directory: string): AsyncGenerator<string> {
-  const ignoredDirectories = new Set([".build", ".git", ".swiftpm", ".terraform", "dist", "node_modules"]);
   const entries = await readdir(directory, { withFileTypes: true });
 
   for (const entry of entries) {
     const path = join(directory, entry.name);
 
     if (entry.isDirectory()) {
-      if (!ignoredDirectories.has(entry.name)) {
+      if (!isSourceScanIgnoredDirectory(entry.name)) {
         yield* walk(path);
       }
     } else if (entry.isFile()) {

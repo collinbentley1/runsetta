@@ -12,6 +12,20 @@ export function foldHexStringLiterals(text: string): string[] {
   return candidates;
 }
 
+const sourceScanIgnoredDirectories = new Set([
+  ".build",
+  ".git",
+  ".swiftpm",
+  ".terraform",
+  "_platform_policy",
+  "dist",
+  "node_modules",
+]);
+
+export function isSourceScanIgnoredDirectory(name: string): boolean {
+  return sourceScanIgnoredDirectories.has(name);
+}
+
 export function findCredentialShapedHexLiterals(
   relativePath: string,
   text: string,
