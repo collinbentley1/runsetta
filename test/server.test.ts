@@ -216,6 +216,12 @@ describe("Runsetta API", () => {
     const fixture = `${quote}${"a".repeat(16)}${quote} + ${quote}${"b".repeat(16)}${quote}`;
 
     expect(foldHexStringLiterals(fixture)).toEqual([`${"a".repeat(16)}${"b".repeat(16)}`]);
+    for (let escapeDepth = 0; escapeDepth <= 4; escapeDepth += 1) {
+      const slashes = "\\".repeat(escapeDepth);
+      expect(foldHexStringLiterals(`${slashes}\"${"c".repeat(32)}${slashes}\"`)).toEqual([
+        "c".repeat(32),
+      ]);
+    }
   });
 
   test("secret policy scans extensionless and Terraform content but permits reviewed SHA pins", () => {
@@ -241,6 +247,36 @@ describe("Runsetta API", () => {
     expect(findCredentialShapedHexLiterals("src/config.ts", `token = "${platformSha}"`)).toEqual([
       platformSha,
     ]);
+  });
+
+  test("secret policy permits only the twice-checked Bun revision in the pinned Dockerfile", async () => {
+    const dockerfile = await readFile(join(root, "Dockerfile"), "utf8");
+
+    expect(findCredentialShapedHexLiterals("Dockerfile", dockerfile)).toEqual([]);
+    expect(
+      findCredentialShapedHexLiterals("src/config.ts", `token = "${Bun.revision}"`),
+    ).toEqual([Bun.revision]);
+    expect(
+      findCredentialShapedHexLiterals(
+        "Dockerfile",
+        dockerfile.replace("FROM oven/bun:1.4.0-alpine@sha256:", "FROM oven/bun:latest@sha256:"),
+      ),
+    ).toEqual([Bun.revision, Bun.revision]);
+    expect(
+      findCredentialShapedHexLiterals(
+        "Dockerfile",
+        dockerfile.replace(
+          "FROM oven/bun:1.4.0-alpine@sha256:",
+          "# FROM oven/bun:1.4.0-alpine@sha256:",
+        ),
+      ),
+    ).toEqual([Bun.revision, Bun.revision]);
+    expect(
+      findCredentialShapedHexLiterals(
+        "Dockerfile",
+        dockerfile.replace("RUN bun -e 'if (Bun.version", "# RUN bun -e 'if (Bun.version"),
+      ),
+    ).toEqual([Bun.revision, Bun.revision]);
   });
 });
 

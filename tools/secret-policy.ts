@@ -1,9 +1,11 @@
 export function foldHexStringLiterals(text: string): string[] {
   const candidates: string[] = [];
-  const expression = /(?:"[0-9a-f]{8,}"|'[0-9a-f]{8,}')(?:\s*\+\s*(?:"[0-9a-f]{8,}"|'[0-9a-f]{8,}'))*/gi;
+  const expression = /(?:\\*["'])[0-9a-f]{8,}(?:\\*["'])(?:\s*\+\s*(?:\\*["'])[0-9a-f]{8,}(?:\\*["']))*/gi;
 
   for (const match of text.matchAll(expression)) {
-    const chunks = [...match[0].matchAll(/["']([0-9a-f]{8,})["']/gi)].map((part) => part[1]!);
+    const chunks = [...match[0].matchAll(/\\*["']([0-9a-f]{8,})\\*["']/gi)].map(
+      (part) => part[1]!,
+    );
     candidates.push(chunks.join(""));
   }
 
@@ -18,7 +20,34 @@ export function findCredentialShapedHexLiterals(
     (candidate) =>
       candidate.length >= 32 &&
       candidate.length < 64 &&
-      !isReviewedPlatformWorkflowSha(relativePath, text, candidate),
+      !isReviewedPlatformWorkflowSha(relativePath, text, candidate) &&
+      !isReviewedBunRevision(relativePath, text, candidate),
+  );
+}
+
+function isReviewedBunRevision(
+  relativePath: string,
+  text: string,
+  candidate: string,
+): boolean {
+  if (relativePath !== "Dockerfile" || candidate !== Bun.revision) {
+    return false;
+  }
+
+  const exactSource =
+    "FROM oven/bun:1.4.0-alpine@sha256:07235578f79ef8c6f97d94aee7938e76f5cdba5f21ae5dbfdd3d3d38058437eb AS bun-release";
+  const exactDepsCheck =
+    `RUN bun -e 'if (Bun.version !== "1.4.0" || Bun.revision !== "${candidate}") throw new Error("Bun image requires 1.4.0+34cbb9a40, got " + Bun.version + "+" + Bun.revision.slice(0, 9))'`;
+  const exactRuntimeCheck =
+    `RUN ["bun", "-e", "if (Bun.version !== \\\"1.4.0\\\" || Bun.revision !== \\\"${candidate}\\\") throw new Error(\\\"Bun image requires 1.4.0+34cbb9a40, got \\\" + Bun.version + \\\"+\\\" + Bun.revision.slice(0, 9))"]`;
+  const lines = text.split(/\r?\n/);
+  const candidateCount = text.split(candidate).length - 1;
+
+  return (
+    lines.filter((line) => line === exactSource).length === 1 &&
+    lines.filter((line) => line === exactDepsCheck).length === 1 &&
+    lines.filter((line) => line === exactRuntimeCheck).length === 1 &&
+    candidateCount === 2
   );
 }
 
