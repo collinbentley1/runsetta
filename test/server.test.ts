@@ -438,15 +438,18 @@ describe("Runsetta API", () => {
     expect(
       findCredentialShapedHexLiterals(
         "Dockerfile",
-        dockerfile.replace("FROM oven/bun:1.4.0-alpine@sha256:", "FROM oven/bun:latest@sha256:"),
+        dockerfile.replace(
+          "FROM platform.invalid/bun-release AS bun-release",
+          "FROM platform.invalid/bun-latest AS bun-release",
+        ),
       ),
     ).toEqual([dockerRevision, dockerRevision]);
     expect(
       findCredentialShapedHexLiterals(
         "Dockerfile",
         dockerfile.replace(
-          "FROM oven/bun:1.4.0-alpine@sha256:",
-          "# FROM oven/bun:1.4.0-alpine@sha256:",
+          "FROM platform.invalid/bun-release AS bun-release",
+          "# FROM platform.invalid/bun-release AS bun-release",
         ),
       ),
     ).toEqual([dockerRevision, dockerRevision]);

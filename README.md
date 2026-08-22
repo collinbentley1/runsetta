@@ -77,11 +77,14 @@ The Terraform mirror may retain named secret containers as inert metadata, but
 new platform review that pins exact numeric secret versions; it is not an
 operator-time configuration change.
 
-Delivery credentials belong only in their protected environments; repository-wide
-copies are forbidden:
-
-- `preview-build` and `production-build`: Docker Hardened Images credentials,
-  the Socket token, and the reviewed Grype database manifest.
-- the platform repository alone owns the trusted-main `dependency-scan` token.
-- publish, deploy, and preview-operation environments: approval/OIDC boundaries
-  only, with no reusable inherited secret bundle.
+The sole credential-bearing build environment is
+`dhi-base-prefetch-20260822-098dca9280b3`, shared by preview and production.
+It contains exactly the public-read-only
+`DHI_PUBLIC_READ_TOKEN_20260822_098DCA9280B3` secret and the non-confidential
+`DHI_USERNAME` variable; repository-wide copies are forbidden. No Socket token
+or mutable Grype database manifest is stored in GitHub. Socket uses public
+policy, and Grype data is byte-pinned in the reviewed platform commit. After
+inventory proof and old provider-token revocation, the retired `preview-build`,
+`production-build`, and `dependency-scan` environments must be empty and
+deleted. Publish, deploy, and preview-operation environments are approval/OIDC
+boundaries only, with no reusable inherited secret bundle.
