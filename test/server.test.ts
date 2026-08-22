@@ -4,6 +4,7 @@ import { join } from "node:path";
 import {
   findCredentialShapedHexLiterals,
   foldHexStringLiterals,
+  isSourceScanIgnoredDirectory,
 } from "../tools/secret-policy";
 
 delete Bun.env.OPENAI_API_KEY;
@@ -211,6 +212,11 @@ describe("Runsetta API", () => {
     }
   });
 
+  test("source scanning excludes the platform policy checkout injected by CI", () => {
+    expect(isSourceScanIgnoredDirectory("_platform_policy")).toBe(true);
+    expect(isSourceScanIgnoredDirectory("src")).toBe(false);
+  });
+
   test("secret policy folds split hexadecimal literals before evaluating their length", () => {
     const quote = '"';
     const fixture = `${quote}${"a".repeat(16)}${quote} + ${quote}${"b".repeat(16)}${quote}`;
@@ -293,9 +299,7 @@ async function walk(directory: string): Promise<string[]> {
   const files: string[] = [];
 
   for (const entry of entries) {
-    if (
-      [".build", ".git", ".swiftpm", ".terraform", "dist", "node_modules"].includes(entry.name)
-    ) {
+    if (isSourceScanIgnoredDirectory(entry.name)) {
       continue;
     }
 
