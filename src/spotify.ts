@@ -1,40 +1,51 @@
-import { appConfig } from "./config";
+import { appConfig, type AppConfig } from "./config";
 import type { SpotifyRefreshRequest, SpotifyTokenRequest } from "./contracts";
 
 const spotifyTokenUrl = "https://accounts.spotify.com/api/token";
 
-export async function exchangeSpotifyCode(input: SpotifyTokenRequest): Promise<unknown> {
+export async function exchangeSpotifyCode(
+  input: SpotifyTokenRequest,
+  config: AppConfig = appConfig,
+): Promise<unknown> {
   const body = new URLSearchParams({
     code: input.code,
     grant_type: "authorization_code",
-    redirect_uri: input.redirectUri ?? appConfig.spotifyRedirectUri ?? "",
+    redirect_uri: input.redirectUri ?? config.spotifyRedirectUri ?? "",
   });
 
   if (input.codeVerifier) {
     body.set("code_verifier", input.codeVerifier);
   }
 
-  return requestSpotifyToken(body);
+  return requestSpotifyToken(body, config);
 }
 
-export async function refreshSpotifyToken(input: SpotifyRefreshRequest): Promise<unknown> {
+export async function refreshSpotifyToken(
+  input: SpotifyRefreshRequest,
+  config: AppConfig = appConfig,
+): Promise<unknown> {
   return requestSpotifyToken(
     new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: input.refreshToken,
     }),
+    config,
   );
 }
 
-async function requestSpotifyToken(body: URLSearchParams): Promise<unknown> {
-  if (!appConfig.spotifyClientId || !appConfig.spotifyClientSecret) {
+async function requestSpotifyToken(body: URLSearchParams, config: AppConfig): Promise<unknown> {
+  if (config.offlineMode) {
+    throw new SpotifyConfigurationError("Spotify token exchange is disabled in offline mode.");
+  }
+
+  if (!config.spotifyClientId || !config.spotifyClientSecret) {
     throw new SpotifyConfigurationError("SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are required.");
   }
 
   const response = await fetch(spotifyTokenUrl, {
     body,
     headers: {
-      Authorization: `Basic ${btoa(`${appConfig.spotifyClientId}:${appConfig.spotifyClientSecret}`)}`,
+      Authorization: `Basic ${btoa(`${config.spotifyClientId}:${config.spotifyClientSecret}`)}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     method: "POST",

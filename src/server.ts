@@ -202,6 +202,9 @@ export function authorizePaidRoute(
     case "/livez":
       return undefined;
     case "/api/audio":
+      if (config.offlineMode) {
+        return jsonError(503, "Network integrations are disabled in offline mode.");
+      }
       integrationEnabled = Boolean(config.openaiApiKey);
       break;
     case "/api/coach":
@@ -210,6 +213,9 @@ export function authorizePaidRoute(
       break;
     case "/api/spotify/token":
     case "/api/spotify/refresh":
+      if (config.offlineMode) {
+        return jsonError(503, "Network integrations are disabled in offline mode.");
+      }
       integrationEnabled = Boolean(config.spotifyClientId && config.spotifyClientSecret);
       break;
     default:

@@ -44,7 +44,10 @@ function isReviewedBunRevision(
   text: string,
   candidate: string,
 ): boolean {
-  if (relativePath !== "Dockerfile" || candidate !== Bun.revision) {
+  if (
+    relativePath !== "Dockerfile" ||
+    !/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/.test(candidate)
+  ) {
     return false;
   }
 

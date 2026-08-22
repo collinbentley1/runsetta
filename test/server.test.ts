@@ -15,6 +15,12 @@ Bun.env.RUNSETTA_OFFLINE = "1";
 
 const { authorizePaidRoute, handleRequest } = await import("../src/server");
 const { appConfig } = await import("../src/config");
+const { createSpeech, ServiceConfigurationError } = await import("../src/audio");
+const {
+  exchangeSpotifyCode,
+  refreshSpotifyToken,
+  SpotifyConfigurationError,
+} = await import("../src/spotify");
 const root = join(import.meta.dir, "..");
 
 describe("Runsetta API", () => {
@@ -95,15 +101,19 @@ describe("Runsetta API", () => {
     expect(response.status).toBe(400);
   });
 
-  test("requires OpenAI configuration for speech", async () => {
+  test("fails closed before speech generation when offline or unconfigured", async () => {
     const response = await handleRequest(jsonRequest("/api/audio", { message: "Keep going." }));
     const body = await response.json();
 
     expect(response.status).toBe(503);
-    expect(body.error).toContain("OPENAI_API_KEY");
+    expect(body.error).toBe(
+      appConfig.offlineMode
+        ? "Network integrations are disabled in offline mode."
+        : "OPENAI_API_KEY is required for speech generation.",
+    );
   });
 
-  test("requires server-side Spotify credentials for token exchange", async () => {
+  test("fails closed before Spotify token exchange when offline or unconfigured", async () => {
     const response = await handleRequest(
       jsonRequest("/api/spotify/token", {
         code: "abc",
@@ -113,7 +123,31 @@ describe("Runsetta API", () => {
     const body = await response.json();
 
     expect(response.status).toBe(503);
-    expect(body.error).toContain("SPOTIFY_CLIENT_ID");
+    expect(body.error).toBe(
+      appConfig.offlineMode
+        ? "Network integrations are disabled in offline mode."
+        : "SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are required.",
+    );
+  });
+
+  test("requires provider credentials when online integrations are explicitly enabled", async () => {
+    const onlineWithoutCredentials = {
+      ...appConfig,
+      offlineMode: false,
+      openaiApiKey: undefined,
+      spotifyClientId: undefined,
+      spotifyClientSecret: undefined,
+    };
+
+    await expect(
+      createSpeech({ format: "mp3", message: "Keep going." }, onlineWithoutCredentials),
+    ).rejects.toThrow("OPENAI_API_KEY");
+    await expect(
+      exchangeSpotifyCode({ code: "code" }, onlineWithoutCredentials),
+    ).rejects.toThrow("SPOTIFY_CLIENT_ID");
+    await expect(
+      refreshSpotifyToken({ refreshToken: "refresh" }, onlineWithoutCredentials),
+    ).rejects.toThrow("SPOTIFY_CLIENT_ID");
   });
 
   test("blocks traversal outside the public directory", async () => {
@@ -193,6 +227,138 @@ describe("Runsetta API", () => {
     expect(authorizePaidRoute("/api/future-paid-route", jsonRequest("/api/future-paid-route", {}), paidConfig)?.status).toBe(503);
   });
 
+  test("offline mode blocks every external integration even if credentials drift in", async () => {
+    const offlineConfig = {
+      ...appConfig,
+      apiBearerToken: "test-api-token-with-at-least-32-bytes",
+      offlineMode: true,
+      openaiApiKey: "configured",
+      spotifyClientId: "configured",
+      spotifyClientSecret: "configured",
+    };
+    const routeExpectations = new Map<string, number | undefined>([
+      ["/api/audio", 503],
+      ["/api/coach", undefined],
+      ["/api/spotify-transition", undefined],
+      ["/api/spotify/token", 503],
+      ["/api/spotify/refresh", 503],
+    ]);
+
+    for (const [route, expectedStatus] of routeExpectations) {
+      const result = authorizePaidRoute(route, jsonRequest(route, {}), offlineConfig);
+      expect(result?.status, route).toBe(expectedStatus);
+      if (expectedStatus === 503) {
+        expect(await result?.json(), route).toEqual({
+          error: "Network integrations are disabled in offline mode.",
+        });
+      }
+    }
+
+    await expect(
+      createSpeech({ format: "mp3", message: "Keep going." }, offlineConfig),
+    ).rejects.toBeInstanceOf(ServiceConfigurationError);
+    await expect(
+      exchangeSpotifyCode({ code: "code" }, offlineConfig),
+    ).rejects.toBeInstanceOf(SpotifyConfigurationError);
+    await expect(
+      refreshSpotifyToken({ refreshToken: "refresh" }, offlineConfig),
+    ).rejects.toBeInstanceOf(SpotifyConfigurationError);
+  });
+
+  test("a fresh offline server blocks every network route before fetch", async () => {
+    const serverModule = new URL("../src/server.ts", import.meta.url).href;
+    const bearer = "test-api-token-with-at-least-32-bytes";
+    const probe = `
+      Bun.env.RUNSETTA_OFFLINE = "1";
+      Bun.env.RUNSETTA_API_TOKEN = ${JSON.stringify(bearer)};
+      Bun.env.OPENAI_API_KEY = "configured";
+      Bun.env.SPOTIFY_CLIENT_ID = "configured";
+      Bun.env.SPOTIFY_CLIENT_SECRET = "configured";
+      let fetchCalls = 0;
+      globalThis.fetch = async () => {
+        fetchCalls += 1;
+        throw new Error("network attempted");
+      };
+      const { handleRequest } = await import(${JSON.stringify(serverModule)});
+      const cases = [
+        ["/api/audio", { message: "Keep going." }],
+        ["/api/coach", { effort: "hard", runnerName: "Collin", workoutType: "run" }],
+        ["/api/spotify-transition", {
+          effort: "hard",
+          runnerName: "Collin",
+          track: { title: "Life" },
+          workoutType: "run",
+        }],
+        ["/api/spotify/token", { code: "code" }],
+        ["/api/spotify/refresh", { refreshToken: "refresh" }],
+      ];
+      const results = [];
+      for (const [path, body] of cases) {
+        const response = await handleRequest(new Request("https://runsetta.test" + path, {
+          body: JSON.stringify(body),
+          headers: {
+            authorization: "Bearer " + ${JSON.stringify(bearer)},
+            "content-type": "application/json",
+          },
+          method: "POST",
+        }));
+        results.push({ body: await response.json(), path, status: response.status });
+      }
+      process.stdout.write(JSON.stringify({ fetchCalls, results }));
+    `;
+    const child = Bun.spawn([process.execPath, "--no-env-file", "-e", probe], {
+      cwd: root,
+      stderr: "pipe",
+      stdout: "pipe",
+    });
+    const [exitCode, stdout, stderr] = await Promise.all([
+      child.exited,
+      new Response(child.stdout).text(),
+      new Response(child.stderr).text(),
+    ]);
+
+    expect(exitCode, stderr).toBe(0);
+    expect(stderr).toBe("");
+    expect(JSON.parse(stdout)).toEqual({
+      fetchCalls: 0,
+      results: [
+        {
+          body: { error: "Network integrations are disabled in offline mode." },
+          path: "/api/audio",
+          status: 503,
+        },
+        {
+          body: {
+            generatedBy: "local-fallback",
+            message: "Collin, stay smooth under pressure, relax your shoulders, and make the next step simple.",
+            model: null,
+          },
+          path: "/api/coach",
+          status: 200,
+        },
+        {
+          body: {
+            generatedBy: "local-fallback",
+            message: "Collin, stay smooth under pressure; let the next song carry the next minute.",
+            model: null,
+          },
+          path: "/api/spotify-transition",
+          status: 200,
+        },
+        {
+          body: { error: "Network integrations are disabled in offline mode." },
+          path: "/api/spotify/token",
+          status: 503,
+        },
+        {
+          body: { error: "Network integrations are disabled in offline mode." },
+          path: "/api/spotify/refresh",
+          status: 503,
+        },
+      ],
+    });
+  });
+
   test("sets browser hardening headers without wildcard CORS", async () => {
     const response = await handleRequest(new Request("https://runsetta.test/"));
 
@@ -257,17 +423,24 @@ describe("Runsetta API", () => {
 
   test("secret policy permits only the twice-checked Bun revision in the pinned Dockerfile", async () => {
     const dockerfile = await readFile(join(root, "Dockerfile"), "utf8");
+    const dockerRevision = dockerfile.match(/Bun\.revision !== "([0-9a-f]{40})"/)?.[1];
+
+    expect(dockerRevision).toBeDefined();
+    if (dockerRevision === undefined) {
+      throw new Error("pinned Dockerfile did not expose its Bun revision check");
+    }
+    expect(dockerRevision).toMatch(/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/);
 
     expect(findCredentialShapedHexLiterals("Dockerfile", dockerfile)).toEqual([]);
     expect(
-      findCredentialShapedHexLiterals("src/config.ts", `token = "${Bun.revision}"`),
-    ).toEqual([Bun.revision]);
+      findCredentialShapedHexLiterals("src/config.ts", `token = "${dockerRevision}"`),
+    ).toEqual([dockerRevision]);
     expect(
       findCredentialShapedHexLiterals(
         "Dockerfile",
         dockerfile.replace("FROM oven/bun:1.4.0-alpine@sha256:", "FROM oven/bun:latest@sha256:"),
       ),
-    ).toEqual([Bun.revision, Bun.revision]);
+    ).toEqual([dockerRevision, dockerRevision]);
     expect(
       findCredentialShapedHexLiterals(
         "Dockerfile",
@@ -276,13 +449,20 @@ describe("Runsetta API", () => {
           "# FROM oven/bun:1.4.0-alpine@sha256:",
         ),
       ),
-    ).toEqual([Bun.revision, Bun.revision]);
+    ).toEqual([dockerRevision, dockerRevision]);
     expect(
       findCredentialShapedHexLiterals(
         "Dockerfile",
         dockerfile.replace("RUN bun -e 'if (Bun.version", "# RUN bun -e 'if (Bun.version"),
       ),
-    ).toEqual([Bun.revision, Bun.revision]);
+    ).toEqual([dockerRevision, dockerRevision]);
+    const wrongRevision = `${dockerRevision.slice(0, -1)}${dockerRevision.endsWith("0") ? "1" : "0"}`;
+    expect(
+      findCredentialShapedHexLiterals(
+        "Dockerfile",
+        dockerfile.replaceAll(dockerRevision, wrongRevision),
+      ),
+    ).toEqual([wrongRevision, wrongRevision]);
   });
 });
 
