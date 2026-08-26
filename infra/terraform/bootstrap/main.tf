@@ -1,5 +1,5 @@
 module "bootstrap" {
-  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=3ce4e9ea52d5e420b5487591f4514cc28d5ab21a"
+  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=81213a156b03794a31eb8a34372b4798709e288f"
 
   app                         = "runsetta"
   project_id                  = var.project_id
@@ -12,10 +12,10 @@ module "bootstrap" {
   github_owner_id             = var.github_owner_id
   github_repository_id        = var.github_repository_id
   trusted_platform_workflow_shas = [
-    "3ce4e9ea52d5e420b5487591f4514cc28d5ab21a",
+    "81213a156b03794a31eb8a34372b4798709e288f",
   ]
   preview_operations_active_workflow_shas = [
-    "3ce4e9ea52d5e420b5487591f4514cc28d5ab21a",
+    "81213a156b03794a31eb8a34372b4798709e288f",
   ]
   preview_operator_transition_workflow_shas = []
   required_services = [
