@@ -2,7 +2,7 @@ terraform {
   required_version = "~> 1.14.0"
 
   backend "gcs" {
-    bucket = "runsetta-tfstate-601124730704"
+    bucket = "runsetta-tfstate-601124730704-bootstrap"
     prefix = "runsetta/bootstrap"
   }
 
