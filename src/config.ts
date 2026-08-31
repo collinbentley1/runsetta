@@ -4,6 +4,7 @@ export const appConfig = {
   port: Number.parseInt(Bun.env.PORT ?? "8080", 10),
   publicDir: Bun.env.PUBLIC_DIR ?? new URL("../public", import.meta.url).pathname,
   maxJsonBytes: Number.parseInt(Bun.env.MAX_JSON_BYTES ?? "16384", 10),
+  apiBearerToken: Bun.env.RUNSETTA_API_TOKEN,
   openaiApiKey: Bun.env.OPENAI_API_KEY,
   messageModel: Bun.env.RUNSETTA_MESSAGE_MODEL,
   ttsModel: Bun.env.RUNSETTA_TTS_MODEL ?? "gpt-4o-mini-tts",
