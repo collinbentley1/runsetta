@@ -61,6 +61,21 @@ try check(RunsettaAPIClient.allowsBearer(over: try require(URL(string: "http://l
 try check(!RunsettaAPIClient.allowsBearer(over: try require(URL(string: "http://runsetta.com"))),
           "plaintext to a remote host must refuse the bearer")
 
+// The whole 127.0.0.0/8 range is loopback, not just 127.0.0.1.
+for host in ["127.0.0.1", "127.0.0.2", "127.1.2.3", "127.255.255.254"] {
+    try check(RunsettaAPIClient.allowsBearer(over: try require(URL(string: "http://\(host):8080"))),
+              "\(host) is loopback and must permit the bearer")
+}
+
+// A name that merely looks like an address resolves off-host and must not be
+// treated as loopback.
+for host in ["127.0.0.1.example.com", "128.0.0.1", "12.7.0.1", "0.0.0.0", "1270.0.0.1", "127.0.0",
+             "127.999.0.1", "127.256.0.1", "127.0.0.-1", "127..0.1",
+             "127.+1.0.1", "127.0x1.0.1"] {
+    try check(!RunsettaAPIClient.allowsBearer(over: try require(URL(string: "http://\(host):8080"))),
+              "\(host) must not be treated as loopback")
+}
+
 // Fails closed before any network access rather than transmitting the
 // credential in plaintext.
 let insecure = RunsettaAPIClient(

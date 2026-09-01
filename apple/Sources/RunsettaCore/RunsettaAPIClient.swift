@@ -45,10 +45,26 @@ public struct RunsettaAPIClient: Sendable {
     /// than transmitting the credential in plaintext.
     public static func allowsBearer(over url: URL) -> Bool {
         if url.scheme?.lowercased() == "https" { return true }
-        switch url.host()?.lowercased() {
-        case "127.0.0.1", "localhost", "::1", "[::1]": return true
-        default: return false
+        guard let host = url.host()?.lowercased() else { return false }
+        if host == "localhost" || host == "::1" || host == "[::1]" { return true }
+        return isIPv4Loopback(host)
+    }
+
+    /// True only for a literal address in 127.0.0.0/8, the whole IPv4 loopback
+    /// range. The parse is strict on purpose: a name that merely looks like an
+    /// address, such as `127.0.0.1.example.com`, must not be treated as
+    /// loopback, because it resolves off-host and would put the bearer on the
+    /// wire in plaintext.
+    static func isIPv4Loopback(_ host: String) -> Bool {
+        let parts = host.split(separator: ".", omittingEmptySubsequences: false)
+        guard parts.count == 4 else { return false }
+        var octets: [Int] = []
+        for part in parts {
+            guard !part.isEmpty, part.count <= 3, part.allSatisfy(\.isNumber),
+                  let value = Int(part), (0...255).contains(value) else { return false }
+            octets.append(value)
         }
+        return octets[0] == 127
     }
 
     public func health() async throws -> HealthStatus {
