@@ -2,20 +2,53 @@ import Foundation
 
 public struct RunsettaAPIClient: Sendable {
     public var baseURL: URL
+    /// Bearer token for the paid API routes. `nil` leaves every request
+    /// unauthenticated, which is correct when the server has no paid
+    /// integration configured -- its gate is inert in that case.
+    public var bearerToken: String?
     public var session: URLSession
     public var decoder: JSONDecoder
     public var encoder: JSONEncoder
 
     public init(
         baseURL: URL = URL(string: "http://127.0.0.1:8080")!,
+        bearerToken: String? = nil,
         session: URLSession = .shared,
         decoder: JSONDecoder = JSONDecoder(),
         encoder: JSONEncoder = JSONEncoder()
     ) {
         self.baseURL = baseURL
+        self.bearerToken = bearerToken
         self.session = session
         self.decoder = decoder
         self.encoder = encoder
+    }
+
+    /// Routes whose server-side gate requires `Authorization: Bearer ...` once
+    /// the matching integration is configured. Mirrors `authorizePaidRoute` in
+    /// src/server.ts. `/livez` and `/api/health` are deliberately absent: the
+    /// token is never sent where the server does not ask for it.
+    public static let authenticatedPaths: Set<String> = [
+        "/api/audio",
+        "/api/coach",
+        "/api/spotify-transition",
+        "/api/spotify/token",
+        "/api/spotify/refresh",
+    ]
+
+    public static func requiresAuthorization(_ path: String) -> Bool {
+        authenticatedPaths.contains(path)
+    }
+
+    /// A bearer token is only ever put on the wire over TLS, or to loopback
+    /// where there is no network to observe. Anything else fails closed rather
+    /// than transmitting the credential in plaintext.
+    public static func allowsBearer(over url: URL) -> Bool {
+        if url.scheme?.lowercased() == "https" { return true }
+        switch url.host()?.lowercased() {
+        case "127.0.0.1", "localhost", "::1", "[::1]": return true
+        default: return false
+        }
     }
 
     public func health() async throws -> HealthStatus {
@@ -31,7 +64,7 @@ public struct RunsettaAPIClient: Sendable {
     }
 
     public func speech(_ request: AudioRequest) async throws -> Data {
-        var urlRequest = requestFor("/api/audio")
+        var urlRequest = try requestFor("/api/audio")
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "content-type")
         urlRequest.httpBody = try encoder.encode(request)
@@ -42,13 +75,13 @@ public struct RunsettaAPIClient: Sendable {
     }
 
     private func get<Response: Decodable>(_ path: String) async throws -> Response {
-        let (data, response) = try await session.data(for: requestFor(path))
+        let (data, response) = try await session.data(for: try requestFor(path))
         try validate(response: response, data: data)
         return try decoder.decode(Response.self, from: data)
     }
 
     private func post<Body: Encodable, Response: Decodable>(_ path: String, body: Body) async throws -> Response {
-        var request = requestFor(path)
+        var request = try requestFor(path)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "content-type")
         request.httpBody = try encoder.encode(body)
@@ -58,8 +91,18 @@ public struct RunsettaAPIClient: Sendable {
         return try decoder.decode(Response.self, from: data)
     }
 
-    private func requestFor(_ path: String) -> URLRequest {
-        URLRequest(url: baseURL.appending(path: path))
+    private func requestFor(_ path: String) throws -> URLRequest {
+        var request = URLRequest(url: baseURL.appending(path: path))
+        guard let bearerToken, Self.requiresAuthorization(path) else {
+            return request
+        }
+
+        guard Self.allowsBearer(over: baseURL) else {
+            throw RunsettaAPIError.insecureTokenTransport
+        }
+
+        request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
+        return request
     }
 
     private func validate(response: URLResponse, data: Data) throws {
@@ -77,6 +120,9 @@ public struct RunsettaAPIClient: Sendable {
 public enum RunsettaAPIError: Error, Equatable, Sendable {
     case invalidResponse
     case http(statusCode: Int, message: String?)
+    /// A bearer token was configured but the base URL is neither HTTPS nor
+    /// loopback, so the request was refused instead of leaking the credential.
+    case insecureTokenTransport
 }
 
 private struct RunsettaErrorResponse: Decodable {
