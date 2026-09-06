@@ -77,30 +77,18 @@ function isReviewedPlatformWorkflowSha(
     return false;
   }
 
-  const sourceRef = text.match(
-    /^\s*source\s*=\s*"github\.com\/collinbentley1\/platform\/\/terraform\/modules\/bootstrap\?ref=([0-9a-f]{40})"\s*$/m,
-  )?.[1];
-  const trustedBlock = text.match(
-    /^\s*trusted_platform_workflow_shas\s*=\s*\[([\s\S]*?)^\s*\]/m,
-  )?.[1];
-  if (!sourceRef || !trustedBlock) {
-    return false;
-  }
-
-  const lines = trustedBlock
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const trustedShas = lines
-    .map((line) => line.match(/^"([0-9a-f]{40})",?(?:\s*#.*)?$/)?.[1])
-    .filter((sha): sha is string => sha !== undefined);
+  const sourceRefs = [...text.matchAll(
+    /^\s*source\s*=\s*"github\.com\/collinbentley1\/platform\/\/terraform\/modules\/bootstrap\?ref=([0-9a-f]{40})"\s*$/gm,
+  )];
+  const activeShas = [...text.matchAll(
+    /^\s*active_workflow_sha\s*=\s*"([0-9a-f]{40})"\s*$/gm,
+  )];
 
   return (
-    trustedShas.length === lines.length &&
-    trustedShas.length >= 1 &&
-    trustedShas.length <= 2 &&
-    new Set(trustedShas).size === trustedShas.length &&
-    trustedShas.includes(sourceRef) &&
-    trustedShas.includes(candidate)
+    sourceRefs.length === 1 &&
+    activeShas.length === 1 &&
+    sourceRefs[0]?.[1] === candidate &&
+    activeShas[0]?.[1] === candidate &&
+    text.split(candidate).length - 1 === 2
   );
 }

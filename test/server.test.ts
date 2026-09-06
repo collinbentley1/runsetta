@@ -409,13 +409,27 @@ describe("Runsetta API", () => {
       ),
     ).toEqual([credential]);
 
-    const reviewedBootstrap = `module "bootstrap" {\n  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=${platformSha}"\n  trusted_platform_workflow_shas = [\n    "${platformSha}",\n  ]\n}\n`;
+    const reviewedBootstrap = `module "bootstrap" {\n  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=${platformSha}"\n  active_workflow_sha = "${platformSha}"\n}\n`;
     expect(
       findCredentialShapedHexLiterals(
         "infra/terraform/bootstrap/main.tf",
         reviewedBootstrap,
       ),
     ).toEqual([]);
+    for (const unreviewed of [
+      reviewedBootstrap.replace("modules/bootstrap", "modules/other"),
+      reviewedBootstrap.replace(`ref=${platformSha}`, `ref=${"c".repeat(40)}`),
+      `${reviewedBootstrap}\nactive_workflow_sha = "${platformSha}"\n`,
+      `${reviewedBootstrap}\napi_token = "${platformSha}"\n`,
+      reviewedBootstrap.replace("active_workflow_sha", "legacy_workflow_sha"),
+    ]) {
+      expect(
+        findCredentialShapedHexLiterals("infra/terraform/bootstrap/main.tf", unreviewed),
+      ).not.toEqual([]);
+    }
+    expect(findCredentialShapedHexLiterals("src/config.ts", reviewedBootstrap)).toEqual([
+      platformSha,
+    ]);
     expect(findCredentialShapedHexLiterals("src/config.ts", `token = "${platformSha}"`)).toEqual([
       platformSha,
     ]);
