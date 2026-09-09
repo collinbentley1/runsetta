@@ -46,7 +46,7 @@ function isReviewedBunRevision(
 ): boolean {
   if (
     relativePath !== "Dockerfile" ||
-    !/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/.test(candidate)
+    !/^744846f844374847c902b5e7fd59b4342a51ef99$/.test(candidate)
   ) {
     return false;
   }
@@ -54,9 +54,9 @@ function isReviewedBunRevision(
   const exactSource =
     "FROM platform.invalid/bun-release AS bun-release";
   const exactDepsCheck =
-    `RUN bun -e 'if (Bun.version !== "1.4.0" || Bun.revision !== "${candidate}") throw new Error("Bun image requires 1.4.0+34cbb9a40, got " + Bun.version + "+" + Bun.revision.slice(0, 9))'`;
+    `RUN bun -e 'if (Bun.version !== "1.4.2" || Bun.revision !== "${candidate}") throw new Error("Bun image requires 1.4.2+744846f84, got " + Bun.version + "+" + Bun.revision.slice(0, 9))'`;
   const exactRuntimeCheck =
-    `RUN ["bun", "-e", "if (Bun.version !== \\\"1.4.0\\\" || Bun.revision !== \\\"${candidate}\\\") throw new Error(\\\"Bun image requires 1.4.0+34cbb9a40, got \\\" + Bun.version + \\\"+\\\" + Bun.revision.slice(0, 9))"]`;
+    `RUN ["bun", "-e", "if (Bun.version !== \\\"1.4.2\\\" || Bun.revision !== \\\"${candidate}\\\") throw new Error(\\\"Bun image requires 1.4.2+744846f84, got \\\" + Bun.version + \\\"+\\\" + Bun.revision.slice(0, 9))"]`;
   const lines = text.split(/\r?\n/);
   const candidateCount = text.split(candidate).length - 1;
 

@@ -443,7 +443,7 @@ describe("Runsetta API", () => {
     if (dockerRevision === undefined) {
       throw new Error("pinned Dockerfile did not expose its Bun revision check");
     }
-    expect(dockerRevision).toMatch(/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/);
+    expect(dockerRevision).toMatch(/^744846f844374847c902b5e7fd59b4342a51ef99$/);
 
     expect(findCredentialShapedHexLiterals("Dockerfile", dockerfile)).toEqual([]);
     expect(
