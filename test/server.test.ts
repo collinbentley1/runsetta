@@ -409,13 +409,27 @@ describe("Runsetta API", () => {
       ),
     ).toEqual([credential]);
 
-    const reviewedBootstrap = `module "bootstrap" {\n  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=${platformSha}"\n  trusted_platform_workflow_shas = [\n    "${platformSha}",\n  ]\n}\n`;
+    const reviewedBootstrap = `module "bootstrap" {\n  source = "github.com/collinbentley1/platform//terraform/modules/bootstrap?ref=${platformSha}"\n  active_workflow_sha = "${platformSha}"\n}\n`;
     expect(
       findCredentialShapedHexLiterals(
         "infra/terraform/bootstrap/main.tf",
         reviewedBootstrap,
       ),
     ).toEqual([]);
+    for (const unreviewed of [
+      reviewedBootstrap.replace("modules/bootstrap", "modules/other"),
+      reviewedBootstrap.replace(`ref=${platformSha}`, `ref=${"c".repeat(40)}`),
+      `${reviewedBootstrap}\nactive_workflow_sha = "${platformSha}"\n`,
+      `${reviewedBootstrap}\napi_token = "${platformSha}"\n`,
+      reviewedBootstrap.replace("active_workflow_sha", "legacy_workflow_sha"),
+    ]) {
+      expect(
+        findCredentialShapedHexLiterals("infra/terraform/bootstrap/main.tf", unreviewed),
+      ).not.toEqual([]);
+    }
+    expect(findCredentialShapedHexLiterals("src/config.ts", reviewedBootstrap)).toEqual([
+      platformSha,
+    ]);
     expect(findCredentialShapedHexLiterals("src/config.ts", `token = "${platformSha}"`)).toEqual([
       platformSha,
     ]);
@@ -429,7 +443,7 @@ describe("Runsetta API", () => {
     if (dockerRevision === undefined) {
       throw new Error("pinned Dockerfile did not expose its Bun revision check");
     }
-    expect(dockerRevision).toMatch(/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/);
+    expect(dockerRevision).toMatch(/^744846f844374847c902b5e7fd59b4342a51ef99$/);
 
     expect(findCredentialShapedHexLiterals("Dockerfile", dockerfile)).toEqual([]);
     expect(

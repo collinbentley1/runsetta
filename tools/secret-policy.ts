@@ -46,7 +46,7 @@ function isReviewedBunRevision(
 ): boolean {
   if (
     relativePath !== "Dockerfile" ||
-    !/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/.test(candidate)
+    !/^744846f844374847c902b5e7fd59b4342a51ef99$/.test(candidate)
   ) {
     return false;
   }
@@ -54,9 +54,9 @@ function isReviewedBunRevision(
   const exactSource =
     "FROM platform.invalid/bun-release AS bun-release";
   const exactDepsCheck =
-    `RUN bun -e 'if (Bun.version !== "1.4.0" || Bun.revision !== "${candidate}") throw new Error("Bun image requires 1.4.0+34cbb9a40, got " + Bun.version + "+" + Bun.revision.slice(0, 9))'`;
+    `RUN bun -e 'if (Bun.version !== "1.4.2" || Bun.revision !== "${candidate}") throw new Error("Bun image requires 1.4.2+744846f84, got " + Bun.version + "+" + Bun.revision.slice(0, 9))'`;
   const exactRuntimeCheck =
-    `RUN ["bun", "-e", "if (Bun.version !== \\\"1.4.0\\\" || Bun.revision !== \\\"${candidate}\\\") throw new Error(\\\"Bun image requires 1.4.0+34cbb9a40, got \\\" + Bun.version + \\\"+\\\" + Bun.revision.slice(0, 9))"]`;
+    `RUN ["bun", "-e", "if (Bun.version !== \\\"1.4.2\\\" || Bun.revision !== \\\"${candidate}\\\") throw new Error(\\\"Bun image requires 1.4.2+744846f84, got \\\" + Bun.version + \\\"+\\\" + Bun.revision.slice(0, 9))"]`;
   const lines = text.split(/\r?\n/);
   const candidateCount = text.split(candidate).length - 1;
 
@@ -77,30 +77,18 @@ function isReviewedPlatformWorkflowSha(
     return false;
   }
 
-  const sourceRef = text.match(
-    /^\s*source\s*=\s*"github\.com\/collinbentley1\/platform\/\/terraform\/modules\/bootstrap\?ref=([0-9a-f]{40})"\s*$/m,
-  )?.[1];
-  const trustedBlock = text.match(
-    /^\s*trusted_platform_workflow_shas\s*=\s*\[([\s\S]*?)^\s*\]/m,
-  )?.[1];
-  if (!sourceRef || !trustedBlock) {
-    return false;
-  }
-
-  const lines = trustedBlock
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const trustedShas = lines
-    .map((line) => line.match(/^"([0-9a-f]{40})",?(?:\s*#.*)?$/)?.[1])
-    .filter((sha): sha is string => sha !== undefined);
+  const sourceRefs = [...text.matchAll(
+    /^\s*source\s*=\s*"github\.com\/collinbentley1\/platform\/\/terraform\/modules\/bootstrap\?ref=([0-9a-f]{40})"\s*$/gm,
+  )];
+  const activeShas = [...text.matchAll(
+    /^\s*active_workflow_sha\s*=\s*"([0-9a-f]{40})"\s*$/gm,
+  )];
 
   return (
-    trustedShas.length === lines.length &&
-    trustedShas.length >= 1 &&
-    trustedShas.length <= 2 &&
-    new Set(trustedShas).size === trustedShas.length &&
-    trustedShas.includes(sourceRef) &&
-    trustedShas.includes(candidate)
+    sourceRefs.length === 1 &&
+    activeShas.length === 1 &&
+    sourceRefs[0]?.[1] === candidate &&
+    activeShas[0]?.[1] === candidate &&
+    text.split(candidate).length - 1 === 2
   );
 }
