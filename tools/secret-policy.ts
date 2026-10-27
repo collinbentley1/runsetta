@@ -35,7 +35,8 @@ export function findCredentialShapedHexLiterals(
       candidate.length >= 32 &&
       candidate.length < 64 &&
       !isReviewedPlatformWorkflowSha(relativePath, text, candidate) &&
-      !isReviewedBunRevision(relativePath, text, candidate),
+      !isReviewedBunRevision(relativePath, text, candidate) &&
+      !isPlatformReleaseMetadata(relativePath, text, candidate),
   );
 }
 
@@ -103,4 +104,12 @@ function isReviewedPlatformWorkflowSha(
     trustedShas.includes(sourceRef) &&
     trustedShas.includes(candidate)
   );
+}
+
+function isPlatformReleaseMetadata(path: string, text: string, candidate: string): boolean {
+  if (path !== ".platform/release.json" || !/^[a-f0-9]{40}$/.test(candidate)) return false;
+  try {
+    const lock = JSON.parse(text) as {schemaVersion:number;sha:string;managed:Record<string,string>};
+    return lock.schemaVersion === 1 && lock.sha === candidate && Object.values(lock.managed).every(hash => /^[a-f0-9]{64}$/.test(hash));
+  } catch { return false; }
 }

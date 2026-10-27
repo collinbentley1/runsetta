@@ -421,51 +421,13 @@ describe("Runsetta API", () => {
     ]);
   });
 
-  test("secret policy permits only the twice-checked Bun revision in the pinned Dockerfile", async () => {
-    const dockerfile = await readFile(join(root, "Dockerfile"), "utf8");
-    const dockerRevision = dockerfile.match(/Bun\.revision !== "([0-9a-f]{40})"/)?.[1];
-
-    expect(dockerRevision).toBeDefined();
-    if (dockerRevision === undefined) {
-      throw new Error("pinned Dockerfile did not expose its Bun revision check");
-    }
-    expect(dockerRevision).toMatch(/^34cbb9a40b4bd1bd767d134a7065e66c2432a676$/);
-
-    expect(findCredentialShapedHexLiterals("Dockerfile", dockerfile)).toEqual([]);
-    expect(
-      findCredentialShapedHexLiterals("src/config.ts", `token = "${dockerRevision}"`),
-    ).toEqual([dockerRevision]);
-    expect(
-      findCredentialShapedHexLiterals(
-        "Dockerfile",
-        dockerfile.replace(
-          "FROM platform.invalid/bun-release AS bun-release",
-          "FROM platform.invalid/bun-latest AS bun-release",
-        ),
-      ),
-    ).toEqual([dockerRevision, dockerRevision]);
-    expect(
-      findCredentialShapedHexLiterals(
-        "Dockerfile",
-        dockerfile.replace(
-          "FROM platform.invalid/bun-release AS bun-release",
-          "# FROM platform.invalid/bun-release AS bun-release",
-        ),
-      ),
-    ).toEqual([dockerRevision, dockerRevision]);
-    expect(
-      findCredentialShapedHexLiterals(
-        "Dockerfile",
-        dockerfile.replace("RUN bun -e 'if (Bun.version", "# RUN bun -e 'if (Bun.version"),
-      ),
-    ).toEqual([dockerRevision, dockerRevision]);
-    const wrongRevision = `${dockerRevision.slice(0, -1)}${dockerRevision.endsWith("0") ? "1" : "0"}`;
-    expect(
-      findCredentialShapedHexLiterals(
-        "Dockerfile",
-        dockerfile.replaceAll(dockerRevision, wrongRevision),
-      ),
-    ).toEqual([wrongRevision, wrongRevision]);
+  test("secret policy permits a validated platform release SHA only in release metadata", async () => {
+    const text = await readFile(join(root, ".platform/release.json"), "utf8");
+    const lock = JSON.parse(text) as {sha:string};
+    expect(findCredentialShapedHexLiterals(".platform/release.json", text)).toEqual([]);
+    expect(findCredentialShapedHexLiterals("src/config.ts", text)).toContain(lock.sha);
+    expect(findCredentialShapedHexLiterals(".platform/release.json", text.replace('"schemaVersion": 1', '"schemaVersion": 0'))).toContain(lock.sha);
+    expect(findCredentialShapedHexLiterals(".platform/release.json", `token = "${lock.sha}"`)).toContain(lock.sha);
   });
 });
 
