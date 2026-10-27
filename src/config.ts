@@ -2,7 +2,7 @@ export const appConfig = {
   appName: "Runsetta",
   environment: Bun.env.NODE_ENV ?? "development",
   port: Number.parseInt(Bun.env.PORT ?? "8080", 10),
-  publicDir: Bun.env.PUBLIC_DIR ?? new URL("../public", import.meta.url).pathname,
+  publicDir: Bun.env.PUBLIC_DIR ?? new URL(import.meta.dir.endsWith("/dist") ? "./public/" : "../public/", import.meta.url).pathname,
   maxJsonBytes: Number.parseInt(Bun.env.MAX_JSON_BYTES ?? "16384", 10),
   apiBearerToken: Bun.env.RUNSETTA_API_TOKEN,
   openaiApiKey: Bun.env.OPENAI_API_KEY,

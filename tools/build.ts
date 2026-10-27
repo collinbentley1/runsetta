@@ -43,3 +43,10 @@ function assertBuild(result: Bun.BuildOutput, label: string): void {
     throw new Error(`${label} build failed`);
   }
 }
+
+// Exercise the compiled artifact; source-only tests cannot catch packaging-path drift.
+const built = await import(join(distDir, "server.js")) as {handleRequest:(request:Request)=>Promise<Response>};
+for (const path of ["/", "/favicon.svg", "/assets/styles.css", "/assets/client.js"]) {
+  const response = await built.handleRequest(new Request(`https://runsetta.test${path}`));
+  if (response.status !== 200 || !response.headers.get("X-Request-ID")) throw new Error(`Built application asset failed: ${path}`);
+}
