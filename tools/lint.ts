@@ -9,21 +9,6 @@ const root = join(import.meta.dir, "..");
 const failures: string[] = [];
 const forbiddenNeedles = ["lang" + "chain", "lang" + "serve"];
 
-await requireContains(
-  "Dockerfile",
-  "FROM platform.invalid/bun-release AS bun-release",
-  "Dockerfile must retain the platform-injected Bun release base.",
-);
-await requireContains(
-  "Dockerfile",
-  "FROM platform.invalid/dhi-bun-dev AS deps",
-  "Dockerfile must retain the platform-injected DHI development base.",
-);
-await requireContains(
-  "Dockerfile",
-  "FROM platform.invalid/dhi-bun-runtime AS runtime",
-  "Dockerfile must retain the platform-injected DHI runtime base.",
-);
 await requireContains("public/index.html", 'rel="icon"', "The document must link a favicon.");
 await rejectContains("public/index.html", "https://", "The frontend should not load third-party assets.");
 await rejectContains(

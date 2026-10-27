@@ -1,3 +1,4 @@
+import { secureHandler } from "../.platform/runtime/http.ts";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { extname, isAbsolute, relative, resolve } from "node:path";
 import { appConfig, type AppConfig } from "./config";
@@ -32,7 +33,7 @@ const routes: Record<string, Handler> = {
     jsonResponse(await refreshSpotifyToken(await parseJson(request, SpotifyRefreshRequestSchema))),
 };
 
-export async function handleRequest(request: Request): Promise<Response> {
+async function applicationRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
 
   if (request.method === "OPTIONS") {
@@ -315,6 +316,8 @@ class HttpError extends Error {
     this.name = "HttpError";
   }
 }
+
+export const handleRequest = secureHandler(applicationRequest);
 
 if (import.meta.main) {
   Bun.serve({
